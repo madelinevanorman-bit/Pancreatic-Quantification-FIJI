@@ -1,27 +1,13 @@
 // ============================================================================
 // --- PANCREAS SECTION QUANTIFICATION MACRO (.VSI WORKFLOW) v10 -------------
 // --- Channels: C1=DAPI, C2=Insulin, C3=Glucagon, C4=Tomato -----------------
-// --- v10 changes (deterministic image management):
-//     - safeClose(): only closes a window if it actually exists
-//     - safeDuplicate(): duplicate always lands at a known, unique name
-//     - particleMaskAndArea() / maskArea(): wraps "Analyze Particles...show=[Masks]"
-//       so the resulting "Mask of X" window is immediately renamed (or closed)
-//       to a known name instead of being assumed/blindly referenced
-//     - All scratch windows use unique TMP_* names instead of being reused
-//       globally (no more shared "SaveTemp", "QC_Base", etc.)
-//     - Every image has exactly one place that renames it; no double-renames
-//     - No code path references a window that was never created
-//     - Analyze Particles never runs directly on a master mask (Tissue_Mask,
-//       Islet_Master_Mask) — it always runs on a disposable duplicate
-//     - Same analysis logic as v9 (tissue detection, ROI drawing, thresholds,
-//       measurements, QC overlays, output files) — only window handling changed
 // ============================================================================
 
 // ============================================================================
 // --- USER CONFIGURATION -----------------------------------------------------
 // ============================================================================
 calibrationScale  = 1.3;
-seriesIndex       = 33;
+seriesIndex       = 17;
 
 minSizeDebris     = 0;
 minSizeNuclei     = 1;
@@ -31,16 +17,16 @@ minTissueSize     = 0.05;
 isletMaskBackupPath = "";
 
 // Stain thresholds: set to -1 for interactive, or hardcode once validated
-fixedThresh_Insulin  = 1573;
-fixedThresh_Glucagon = 15085;
-fixedThresh_Tomato   = 48614;
+fixedThresh_Insulin  = 680;
+fixedThresh_Glucagon = 279;
+fixedThresh_Tomato   = 914;
 
 // Brightness/contrast: set to -1 for interactive, or hardcode once validated
 // To find values: run interactively, note Min/Max shown in B/C window, paste here
 fixedBC_DAPI_min     = 0;     fixedBC_DAPI_max     = 1768;
-fixedBC_Insulin_min  = 1551;    fixedBC_Insulin_max  = 2921;
-fixedBC_Glucagon_min = 15038;    fixedBC_Glucagon_max = 16249;
-fixedBC_Tomato_min   = 48559;   fixedBC_Tomato_max   = 52082;
+fixedBC_Insulin_min  = 478;    fixedBC_Insulin_max  = 3412;
+fixedBC_Glucagon_min = 1945;    fixedBC_Glucagon_max = 3412;
+fixedBC_Tomato_min   = 1945;   fixedBC_Tomato_max   = 3890;
 
 // ============================================================================
 // --- CORE SAFETY HELPERS -----------------------------------------------------
@@ -228,11 +214,7 @@ function showOverlay(originalWindow, maskWindow, label, outlineColor, savePath) 
     if (hasSelection) {
         selectWindow(tmpBase);
         run("Restore Selection");
-        if (outlineColor == "red")     { setForegroundColor(255, 0,   0);   }
-        if (outlineColor == "green")   { setForegroundColor(0,   255, 0);   }
-        if (outlineColor == "magenta") { setForegroundColor(255, 0,   255); }
-        if (outlineColor == "cyan")    { setForegroundColor(0,   255, 255); }
-        if (outlineColor == "yellow")  { setForegroundColor(255, 255, 0);   }
+setForegroundColor(255, 255, 0);
         run("Draw", "slice");
         run("Select None");
     } else {
@@ -272,7 +254,6 @@ function ensureIsletMask() {
             exit("ERROR: 'Islet_Master_Mask' is missing and no backup file exists to restore from.\n" +
                  "This should not happen — please re-run the macro from the start.");
         }
-        print("WARNING: 'Islet_Master_Mask' window was missing — restoring from backup file.");
         open(isletMaskBackupPath);
         rename("Islet_Master_Mask");
         // restored TIFF may carry an inverting LUT / non-255 foreground; normalize
@@ -457,7 +438,7 @@ saveDarkMask("Tissue_Mask",
 showOverlay("DAPI",
             "Tissue_Mask",
             "Total Pancreas Tissue",
-            "cyan",
+            "yellow",
             outputFolder + "QC1_Tissue_Overlay.tif");
 
 
@@ -683,7 +664,7 @@ saveDarkMask("Insulin_Clean_Mask",
 showOverlay("Insulin",
             "Insulin_Clean_Mask",
             "Insulin",
-            "magenta",
+            "yellow",
             outputFolder + "QC3_Insulin_Overlay.tif");
 
 setBatchMode(true);
@@ -753,7 +734,7 @@ saveDarkMask("Glucagon_Clean_Mask",
 showOverlay("Glucagon",
             "Glucagon_Clean_Mask",
             "Glucagon",
-            "cyan",
+            "yellow",
             outputFolder + "QC3_Glucagon_Overlay.tif");
 
 setBatchMode(true);
@@ -823,7 +804,7 @@ saveDarkMask("Tomato_Clean_Mask",
 showOverlay("Tomato",
             "Tomato_Clean_Mask",
             "Tomato",
-            "red",
+            "yellow",
             outputFolder + "QC3_Tomato_Overlay.tif");
 
 setBatchMode(true);
