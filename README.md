@@ -1,5 +1,7 @@
 Used to quantify Insulin, Glucagon, Tomato, and tissue area.  
 Using FIJI version 21.0.7 (64-bit). 
+Use the QuPath-to-FIJI Pipeline First and open the GeoJSON file to convert into a ZIP
+Then open FIJI and open the main VSI, then when it opens up the finder again later use the ZIP file made in the last step.
 Some notes: 
 In the code to change brightness and contrast or threshold put -1 in the number areas at the top.
 Can change colors in "Open .VSI section" to preferred colors
