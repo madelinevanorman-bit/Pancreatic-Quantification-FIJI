@@ -2,12 +2,16 @@
 // --- PANCREAS SECTION QUANTIFICATION MACRO (.VSI WORKFLOW) v10 -------------
 // --- Channels: C1=DAPI, C2=Insulin, C3=Glucagon, C4=Tomato -----------------
 // ============================================================================
-
+//Notes: In the code to change brightness and contrast or threshold put -1 in the number areas at the top. 
+//Can change colors in "Open .VSI section" to preferred colors
+//Section 1 is series index 17, Section 2 is series index 25, series 3 is 33.
+//The outputs folder at the end does not make a new folder every time, so before running again on the same slide make sure to move the contents or change the name
+//Used for Insulin in channel 488 and Glucagon in channel 647: FITC = Insulin, TRITC= Tomato, Cy5 = Glucagon
 // ============================================================================
 // --- USER CONFIGURATION -----------------------------------------------------
 // ============================================================================
 calibrationScale  = 1.3;
-seriesIndex       = 17;
+seriesIndex       = 33; // Section 1=17, Section 2=25, Section 3=33
 
 minSizeDebris     = 0;
 minSizeNuclei     = 1;
@@ -17,16 +21,16 @@ minTissueSize     = 0.05;
 isletMaskBackupPath = "";
 
 // Stain thresholds: set to -1 for interactive, or hardcode once validated
-fixedThresh_Insulin  = 680;
-fixedThresh_Glucagon = 279;
-fixedThresh_Tomato   = 914;
+fixedThresh_Insulin  = -1;
+fixedThresh_Glucagon = -1;
+fixedThresh_Tomato   = -1;
 
 // Brightness/contrast: set to -1 for interactive, or hardcode once validated
 // To find values: run interactively, note Min/Max shown in B/C window, paste here
 fixedBC_DAPI_min     = 0;     fixedBC_DAPI_max     = 1768;
-fixedBC_Insulin_min  = 478;    fixedBC_Insulin_max  = 3412;
-fixedBC_Glucagon_min = 1945;    fixedBC_Glucagon_max = 3412;
-fixedBC_Tomato_min   = 1945;   fixedBC_Tomato_max   = 3890;
+fixedBC_Insulin_min  = -1;    fixedBC_Insulin_max  = -1;
+fixedBC_Glucagon_min = -1;    fixedBC_Glucagon_max = -1;
+fixedBC_Tomato_min   = -1;   fixedBC_Tomato_max   = -1;
 
 // ============================================================================
 // --- CORE SAFETY HELPERS -----------------------------------------------------
@@ -235,7 +239,7 @@ setForegroundColor(255, 255, 0);
         "relative to the original channel signal.\n\n" +
         "Check that the outline tightly follows real positive cells.\n" +
         "If it looks off, note it — you can adjust thresholds and re-run.\n\n" +
-        "Scroll to zoom, Space+drag to pan.\n" +
+        "Press + to zoom, Space+drag to pan.\n" +
         "Click OK to continue.");
     setBatchMode(true);
     safeClose(qcTitle);
@@ -292,7 +296,6 @@ function roisToMask(referenceWindow, destName) {
 // ============================================================================
 // --- OPEN .VSI, SET SCALE, ASSIGN LUTs -------------------------------------
 // ============================================================================
-
 vsiPath = File.openDialog("Select your .vsi file:");
 slideID = File.getNameWithoutExtension(vsiPath);
 
@@ -335,7 +338,7 @@ for (c = 1; c <= 4; c++) {
             "Only Channel " + c + " (" + channelNames[c-1] + ") is visible.\n\n" +
             "Adjust the Min/Max sliders until the staining looks right.\n" +
             "Note the Min/Max values to hardcode them later.\n" +
-            "Scroll to zoom in/out, Space+drag to pan.\n\n" +
+            "Press +/- to zoom in/out, Space+drag to pan.\n\n" +
             "Click OK to move to the next channel.");
     } else {
         // Hardcoded mode
@@ -390,7 +393,6 @@ waitForUser("SET PANCREAS TISSUE THRESHOLD",
     "Adjust threshold until the ENTIRE pancreas tissue region is highlighted.\n\n" +
     "The blurred DAPI signal should create one continuous tissue block.\n" +
     "Do not worry about individual nuclei — we are measuring total tissue area.\n\n" +
-    "Exclude empty background.\n\n" +
     "Click OK when satisfied.\n" +
     "Do NOT click Apply in the Threshold window.");
 
@@ -452,7 +454,7 @@ print("Step 2: Setting up islet ROIs...");
 // ----------------------------------------------------
 // USER SELECTS ISLET ROI ZIP FILE
 // ----------------------------------------------------
-
+print("Choose Islet ROI ZIP file");
 existingIsletROIs = File.openDialog("Choose Islet ROI ZIP file");
 
 if (existingIsletROIs == "") {
